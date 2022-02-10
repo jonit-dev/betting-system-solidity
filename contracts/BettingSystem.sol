@@ -24,7 +24,7 @@ contract BettingSystem {
     mapping(string => TeamInfo) teamInfo;
 
     bool isBetActive = true;
-    address manager;
+    address public manager;
     string[] public allowedTeams;
 
     event PayoutTransfer(address to, uint value);
