@@ -92,6 +92,29 @@ contract("Betting", async (accounts) => {
     await truffleAssert.fails(betting.placeBet("", { from: accounts[0], value: web3.utils.toWei("1", "ether") }));
   });
 
+
+  it("only managers can call emergencyWithdraw", async () => {
+    await truffleAssert.fails(betting.emergencyWithdraw({ from: accounts[1] }));
+  });
+
+  it("should transfer all money back to the manager, if emergencyWithdraw is called", async() => {
+
+    betting = await Betting.new(["Team A", "Team B"], { from: accounts[0] });
+
+    await betting.placeBet("Team A", { from: accounts[0], value: web3.utils.toWei("1", "ether") });
+
+    const initialManagerBalance = await web3.eth.getBalance(accounts[0]);
+
+    await betting.emergencyWithdraw({ from: accounts[0] });
+
+    const finalManagerBalance = await web3.eth.getBalance(accounts[0]);
+
+    const initialBalanceInETH = web3.utils.fromWei(initialManagerBalance);
+    const finalBalanceInETH = web3.utils.fromWei(finalManagerBalance);
+
+    assert.equal(_.round(finalBalanceInETH - initialBalanceInETH), 1);
+  }); 
+
   it("should refund all player if a draw is called", async () => {});
 
   it("should not be able to place bets, once the contract is not active", async () => {
